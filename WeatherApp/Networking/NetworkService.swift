@@ -28,7 +28,7 @@ class NetworkService {
     func getWeeklyWeather(city: String, completion: @escaping (Result<WeeklyForecast, WeatherError>) -> Void) {
         let parameters: Parameters = [
             "q": city,
-            "days": "3",
+//            "days": "3",
             "key": apiKey
         ]
         let endpoint = "/forecast.json"
@@ -50,7 +50,7 @@ class NetworkService {
     
     /// Making request using URLSession
     func getCurrentWeather(city: String, complition: @escaping (Result<CurrentForecast, WeatherError>) -> Void) {
-        let endpoint = baseUrl + "?key=\(apiKey)&q=\(city)"
+        let endpoint = baseUrl + "/current.json?key=\(apiKey)&q=\(city)"
         
         guard let url = URL(string: endpoint) else {
             complition(.failure(.invalidUrl))

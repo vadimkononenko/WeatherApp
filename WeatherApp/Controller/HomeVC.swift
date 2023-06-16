@@ -7,6 +7,7 @@
 
 import UIKit
 import SnapKit
+import Kingfisher
 
 class HomeVC: UIViewController {
     
@@ -16,6 +17,7 @@ class HomeVC: UIViewController {
         let lbl = UILabel()
         lbl.text = "23"
         lbl.font = .boldSystemFont(ofSize: 68)
+        lbl.textColor = .white
         return lbl
     }()
     
@@ -23,21 +25,21 @@ class HomeVC: UIViewController {
         let lbl = UILabel()
         lbl.text = "Kyiv, Ukraine"
         lbl.font = .boldSystemFont(ofSize: 16)
+        lbl.textColor = .white
         return lbl
     }()
     
     private let weatherImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFit
-        imageView.image = UIImage(systemName: "moon")
-        imageView.tintColor = .black
+        imageView.contentMode = .scaleAspectFill
         return imageView
     }()
     
-    private let tempInfoLabel: UILabel = {
+    private let avgTempLabel: UILabel = {
         let lbl = UILabel()
         lbl.text = "24"
         lbl.font = .systemFont(ofSize: 18)
+        lbl.textColor = .white
         return lbl
     }()
     
@@ -64,31 +66,45 @@ class HomeVC: UIViewController {
         super.viewDidLoad()
         configure()
         
-        loadWeather(city: "London")
+        let searchButton = UIBarButtonItem(image: UIImage(systemName: "magnifyingglass"), style: .plain, target: self, action: #selector(handleSearchButtonPressed))
+        searchButton.tintColor = .black
+        navigationItem.rightBarButtonItem = searchButton
+        
+        loadWeather(city: "Berlin")
     }
     
     //MARK: - Helpers
     
+    @objc private func handleSearchButtonPressed() {
+        
+    }
+    
     private func loadWeather(city: String) {
-        NetworkService.shared.getCurrentWeather(city: city) { result in
+        NetworkService.shared.getWeeklyWeather(city: city) { result in
             switch result {
-            case .success(let currentForecast):
-                self.updateUI(forecast: currentForecast)
+            case .success(let forecast):
+                self.updateUI(forecastModel: forecast)
             case .failure(let error):
                 print(error.rawValue)
             }
         }
     }
     
-    private func updateUI(forecast: CurrentForecast) {
-        let temp = "\(forecast.current.tempC)°"
-        let location = "\(forecast.location.name), \(forecast.location.country)"
-        let feelslike = "Feels \(Int(floor(forecast.current.feelslikeC)))°"
+    private func updateUI(forecastModel: WeeklyForecast) {
+        let temp = "\(forecastModel.current.tempC)°"
+        let location = "\(forecastModel.location.name), \(forecastModel.location.country)"
+        let minTemp = Int(floor(forecastModel.forecast.forecastday[0].day.mintempC))
+        let maxTemp = Int(floor(forecastModel.forecast.forecastday[0].day.maxtempC))
+        let minMaxTemp = "min: \(minTemp)° max: \(maxTemp)°"
+        guard let url = URL(string: "http:\(forecastModel.current.condition.icon)") else {
+            return
+        }
         
         DispatchQueue.main.async { [self] in
             self.tempLabel.text = temp
             self.locationInfoLabel.text = location
-            self.tempInfoLabel.text = feelslike
+            self.avgTempLabel.text = minMaxTemp
+            self.weatherImageView.kf.setImage(with: url)
         }
     }
     
@@ -100,11 +116,11 @@ class HomeVC: UIViewController {
     }
     
     private func setupViews() {
-        view.backgroundColor = .white
+        view.backgroundColor = UIColor(named: "bg")
         view.addSubview(tempLabel)
         view.addSubview(locationInfoLabel)
         view.addSubview(weatherImageView)
-        view.addSubview(tempInfoLabel)
+        view.addSubview(avgTempLabel)
     }
     
     private func setupConstraints() {
@@ -117,13 +133,13 @@ class HomeVC: UIViewController {
             make.centerX.equalToSuperview()
         }
         weatherImageView.snp.makeConstraints { make in
-            make.top.equalTo(locationInfoLabel.snp.bottom).offset(20)
+            make.top.equalTo(locationInfoLabel.snp.bottom).offset(10)
             make.centerX.equalToSuperview()
-            make.width.equalTo(100)
-            make.height.equalTo(150)
+            make.width.equalTo(150)
+            make.height.equalTo(200)
         }
-        tempInfoLabel.snp.makeConstraints { make in
-            make.top.equalTo(weatherImageView.snp.bottom).offset(20)
+        avgTempLabel.snp.makeConstraints { make in
+            make.top.equalTo(weatherImageView.snp.bottom).offset(30)
             make.centerX.equalToSuperview()
         }
     }
