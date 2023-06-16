@@ -8,14 +8,20 @@
 import UIKit
 import SnapKit
 import Kingfisher
+import CoreLocation
 
 class HomeVC: UIViewController {
+    
+    //MARK: - Variables
+    
+    private let locationManager = CLLocationManager()
+    private var latitude: Double?
+    private var longitude: Double?
     
     //MARK: - Views
     
     private let tempLabel: UILabel = {
         let lbl = UILabel()
-        lbl.text = "23"
         lbl.font = .boldSystemFont(ofSize: 68)
         lbl.textColor = .white
         return lbl
@@ -23,7 +29,6 @@ class HomeVC: UIViewController {
     
     private let locationInfoLabel: UILabel = {
         let lbl = UILabel()
-        lbl.text = "Kyiv, Ukraine"
         lbl.font = .boldSystemFont(ofSize: 16)
         lbl.textColor = .white
         return lbl
@@ -37,7 +42,6 @@ class HomeVC: UIViewController {
     
     private let avgTempLabel: UILabel = {
         let lbl = UILabel()
-        lbl.text = "24"
         lbl.font = .systemFont(ofSize: 18)
         lbl.textColor = .white
         return lbl
@@ -70,17 +74,38 @@ class HomeVC: UIViewController {
         searchButton.tintColor = .black
         navigationItem.rightBarButtonItem = searchButton
         
-        loadWeather(city: "Berlin")
+        locationManager.delegate = self
+        locationManager.requestWhenInUseAuthorization()
+        locationManager.startUpdatingLocation()
+        
+        NotificationCenter.default.addObserver(self, selector: #selector(handleChosenLocation), name: Notification.Name("ChoseLocation"), object: nil)
     }
     
     //MARK: - Helpers
+    
+    @objc private func handleChosenLocation(_ notification: Notification) {
+        if let lat = notification.userInfo?["lat"] as? Double, let lon = notification.userInfo?["lon"] as? Double {
+            loadWeatherForLocation(latitude: lat, longitude: lon)
+        }
+    }
     
     @objc private func handleSearchButtonPressed() {
         navigationController?.pushViewController(SearchVC(), animated: true)
     }
     
-    private func loadWeather(city: String) {
+    private func loadWeatherForCity(city: String) {
         NetworkService.shared.getWeeklyWeather(city: city) { result in
+            switch result {
+            case .success(let forecast):
+                self.updateUI(forecastModel: forecast)
+            case .failure(let error):
+                print(error.rawValue)
+            }
+        }
+    }
+    
+    private func loadWeatherForLocation(latitude: Double, longitude: Double) {
+        NetworkService.shared.getWeeklyWeather(latitude: latitude, longitude: longitude) { result in
             switch result {
             case .success(let forecast):
                 self.updateUI(forecastModel: forecast)
@@ -144,4 +169,21 @@ class HomeVC: UIViewController {
         }
     }
 
+}
+
+extension HomeVC: CLLocationManagerDelegate {
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let currentLocation = locations.last else {
+            return
+        }
+        
+        let latitude = currentLocation.coordinate.latitude
+        let longitude = currentLocation.coordinate.longitude
+        
+        loadWeatherForLocation(latitude: latitude, longitude: longitude)
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print(error)
+    }
 }

@@ -28,7 +28,33 @@ class NetworkService {
     func getWeeklyWeather(city: String, completion: @escaping (Result<WeeklyForecast, WeatherError>) -> Void) {
         let parameters: Parameters = [
             "q": city,
-//            "days": "3",
+            "key": apiKey
+        ]
+        let endpoint = "/forecast.json"
+        
+        AF.request(baseUrl + endpoint, parameters: parameters).responseDecodable(of: WeeklyForecast.self) { response in
+            guard let data = response.data else {
+                completion(.failure(.invalidData))
+                return
+            }
+            
+            do {
+                let forecast = try JSONDecoder().decode(WeeklyForecast.self, from: data)
+                completion(.success(forecast))
+            } catch {
+                completion(.failure(.unableToComplete))
+            }
+        }
+    }
+    
+    /// Making request using Alamofire
+    func getWeeklyWeather(latitude: Double,
+                          longitude: Double,
+                          completion: @escaping (Result<WeeklyForecast, WeatherError>) -> Void
+    ) {
+        let coordinate = "\(latitude),\(longitude)"
+        let parameters: Parameters = [
+            "q": coordinate,
             "key": apiKey
         ]
         let endpoint = "/forecast.json"

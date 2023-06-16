@@ -62,6 +62,8 @@ class SearchVC: UIViewController {
             
             // Отримані координати місця
             print("Coordinates: \(coordinate.latitude), \(coordinate.longitude)")
+            
+            NotificationCenter.default.post(name: Notification.Name("ChoseLocation"), object: nil, userInfo: ["lat": coordinate.latitude, "lon": coordinate.longitude])
         }
     }
     
