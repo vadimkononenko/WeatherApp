@@ -76,7 +76,7 @@ class HomeVC: UIViewController {
     //MARK: - Helpers
     
     @objc private func handleSearchButtonPressed() {
-        
+        navigationController?.pushViewController(SearchVC(), animated: true)
     }
     
     private func loadWeather(city: String) {

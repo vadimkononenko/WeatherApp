@@ -64,6 +64,13 @@
 			path = Helpers;
 			sourceTree = "<group>";
 		};
+		A7ABCC352A3C6142005BE32B /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
 		A7E69E5E2A3B33F1002E8889 = {
 			isa = PBXGroup;
 			children = (
@@ -85,6 +92,7 @@
 		A7E69E692A3B33F2002E8889 /* WeatherApp */ = {
 			isa = PBXGroup;
 			children = (
+				A7ABCC352A3C6142005BE32B /* Managers */,
 				A73892962A3B9CD000A546C9 /* Helpers */,
 				A7E69E832A3B45D7002E8889 /* Networking */,
 				A7E69E822A3B45D3002E8889 /* Model */,
