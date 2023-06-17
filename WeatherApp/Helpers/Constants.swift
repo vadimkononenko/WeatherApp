@@ -6,5 +6,5 @@
 //
 
 class Constants {
-    static let apiKey = ""
+    static let apiKey = "567c8f95b05544efb06101953232402"
 }
