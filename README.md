@@ -16,10 +16,15 @@ XCode - середовище розробки застосунків (версі
 ### Встановлення необхідних бібліотек
 
 target 'WeatherApp' do
+
   use_frameworks!
+  
 	pod 'SnapKit', '~> 5.6.0'
+ 
 	pod 'Alamofire'
+ 
 	pod 'Kingfisher', '~> 7.0'
+ 
 end
 
 ### Запуск застосунку
